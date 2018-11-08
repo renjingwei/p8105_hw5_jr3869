@@ -52,4 +52,7 @@ data %>%
   theme(legend.position = "bottom")
 ```
 
+The result showed that weekly observations for control arm were relatively stable through out the entire eight weeks. However, for experimental arm, obersations increase through out the eight weeks, approximately increasing by 5.
+
+
 
