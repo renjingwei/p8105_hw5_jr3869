@@ -56,3 +56,25 @@ The result showed that weekly observations for control arm were relatively stabl
 
 
 
+### problem 2
+
+Describe the raw data. 
+
+```{r,raw}
+
+homicide_data = read_csv("./data2/homicide-data.csv") 
+
+```
+
+This dataset has `r nrow(homicide_data)` rows and `r ncol(homicide_data)` columns. Variables include reported date, each victim's information ,included id, names, race, age and sex, and   the location of the killing, included city, state, longitude and latitude and finally whether an arrest was made.
+
+
+Create a city_state variable (e.g. “Baltimore, MD”) and then summarize within cities to obtain the total number of homicides and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
+
+For the city of Baltimore, MD, use the prop.test function to estimate the proportion of homicides that are unsolved; save the output of prop.test as an R object, apply the broom::tidy to this object and pull the estimated proportion and confidence intervals from the resulting tidy dataframe.
+
+Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.
+
+Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.
+
+
