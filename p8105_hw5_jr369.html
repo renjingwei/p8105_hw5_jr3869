@@ -179,9 +179,44 @@ data = data %&gt;%
 ##   lon = col_double(),
 ##   disposition = col_character()
 ## )</code></pre>
-<p>This dataset has 52179 rows and 12 columns. Variables include reported date, each victim’s information ,included id, names, race, age and sex, and the location of the killing, included city, state, longitude and latitude and finally whether an arrest was made.</p>
+<p>The raw dataset has 52179 rows and 12 columns. Variables include reported date, each victim’s information ,included id, names, race, age and sex, and the location of the killing, included city, state, longitude and latitude and finally whether an arrest was made.</p>
 <p>Create a city_state variable (e.g. “Baltimore, MD”) and then summarize within cities to obtain the total number of homicides and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).</p>
+<pre class="r"><code>homicide = 
+  homicide_data%&gt;%
+  mutate(city_state = str_c(city, &quot;, &quot;, state)) %&gt;%
+  group_by(city_state, disposition) %&gt;%
+  summarise(number= n()) %&gt;%
+  spread(key = disposition, value = number) %&gt;%
+  janitor::clean_names() %&gt;%
+  mutate(total_homicides = rowSums(cbind(closed_by_arrest, closed_without_arrest, open_no_arrest), na.rm = T), unsolve_homicides = rowSums(cbind(closed_without_arrest, open_no_arrest), na.rm = T)) %&gt;%
+  select(- closed_by_arrest, - closed_without_arrest, -open_no_arrest)
+
+head(homicide)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+## # Groups:   city_state [6]
+##   city_state      total_homicides unsolve_homicides
+##   &lt;chr&gt;                     &lt;dbl&gt;             &lt;dbl&gt;
+## 1 Albuquerque, NM             378               146
+## 2 Atlanta, GA                 973               373
+## 3 Baltimore, MD              2827              1825
+## 4 Baton Rouge, LA             424               196
+## 5 Birmingham, AL              800               347
+## 6 Boston, MA                  614               310</code></pre>
 <p>For the city of Baltimore, MD, use the prop.test function to estimate the proportion of homicides that are unsolved; save the output of prop.test as an R object, apply the broom::tidy to this object and pull the estimated proportion and confidence intervals from the resulting tidy dataframe.</p>
+<pre class="r"><code>baltimore = 
+  homicide %&gt;%
+  filter(city_state == &quot;Baltimore, MD&quot;)
+
+ proptest = prop.test(baltimore$unsolve_homicides, baltimore$total_homicides)
+ 
+ proptest %&gt;% 
+  broom::tidy() %&gt;% 
+  select(estimate, conf.low, conf.high)</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   estimate conf.low conf.high
+##      &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1    0.646    0.628     0.663</code></pre>
+<p>The estimated proprotion for Baltimore is 64.6 % with the confidence interval (0.628,0.663)</p>
 <p>Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.</p>
 <p>Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.</p>
 </div>

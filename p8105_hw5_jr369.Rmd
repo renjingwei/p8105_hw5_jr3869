@@ -66,12 +66,41 @@ homicide_data = read_csv("./data2/homicide-data.csv")
 
 ```
 
-This dataset has `r nrow(homicide_data)` rows and `r ncol(homicide_data)` columns. Variables include reported date, each victim's information ,included id, names, race, age and sex, and   the location of the killing, included city, state, longitude and latitude and finally whether an arrest was made.
-
+The raw dataset has `r nrow(homicide_data)` rows and `r ncol(homicide_data)` columns. Variables include reported date, each victim's information ,included id, names, race, age and sex, and   the location of the killing, included city, state, longitude and latitude and finally whether an arrest was made.
 
 Create a city_state variable (e.g. “Baltimore, MD”) and then summarize within cities to obtain the total number of homicides and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
 
+```{r, tidy}
+homicide = 
+  homicide_data%>%
+  mutate(city_state = str_c(city, ", ", state)) %>%
+  group_by(city_state, disposition) %>%
+  summarise(number= n()) %>%
+  spread(key = disposition, value = number) %>%
+  janitor::clean_names() %>%
+  mutate(total_homicides = rowSums(cbind(closed_by_arrest, closed_without_arrest, open_no_arrest), na.rm = T), unsolve_homicides = rowSums(cbind(closed_without_arrest, open_no_arrest), na.rm = T)) %>%
+  select(- closed_by_arrest, - closed_without_arrest, -open_no_arrest)
+
+head(homicide)
+
+```
+
 For the city of Baltimore, MD, use the prop.test function to estimate the proportion of homicides that are unsolved; save the output of prop.test as an R object, apply the broom::tidy to this object and pull the estimated proportion and confidence intervals from the resulting tidy dataframe.
+
+```{r}
+baltimore = 
+  homicide %>%
+  filter(city_state == "Baltimore, MD")
+
+ proptest = prop.test(baltimore$unsolve_homicides, baltimore$total_homicides)
+ 
+ proptest %>% 
+  broom::tidy() %>% 
+  select(estimate, conf.low, conf.high)
+```
+
+The estimated proprotion for Baltimore is 64.6 % with the confidence interval (0.628,0.663)
+
 
 Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.
 
