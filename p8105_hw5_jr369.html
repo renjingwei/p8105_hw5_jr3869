@@ -218,6 +218,28 @@ head(homicide)</code></pre>
 ## 1    0.646    0.628     0.663</code></pre>
 <p>The estimated proprotion for Baltimore is 64.6 % with the confidence interval (0.628,0.663)</p>
 <p>Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.</p>
+<pre class="r"><code>prop_zip = function(x,y){
+  
+  prop.test(x,y) %&gt;%
+    broom::tidy()
+}
+
+city_prop =
+  ungroup(homicide) %&gt;%
+  mutate(prop_test = map2(homicide$unsolve_homicides, homicide$total_homicides, prop_zip))%&gt;%
+  unnest() %&gt;%
+  select(city_state, estimate,conf.low, conf.high)</code></pre>
+<pre><code>## Warning in prop.test(x, y): Chi-squared approximation may be incorrect</code></pre>
+<pre class="r"><code>head(city_prop)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   city_state      estimate conf.low conf.high
+##   &lt;chr&gt;              &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Albuquerque, NM    0.386    0.337     0.438
+## 2 Atlanta, GA        0.383    0.353     0.415
+## 3 Baltimore, MD      0.646    0.628     0.663
+## 4 Baton Rouge, LA    0.462    0.414     0.511
+## 5 Birmingham, AL     0.434    0.399     0.469
+## 6 Boston, MA         0.505    0.465     0.545</code></pre>
 <p>Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.</p>
 </div>
 

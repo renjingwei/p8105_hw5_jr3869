@@ -104,6 +104,25 @@ The estimated proprotion for Baltimore is 64.6 % with the confidence interval (0
 
 Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.
 
+```{r}
+prop_zip = function(x,y){
+  
+  prop.test(x,y) %>%
+    broom::tidy()
+}
+
+city_prop =
+  ungroup(homicide) %>%
+  mutate(prop_test = map2(homicide$unsolve_homicides, homicide$total_homicides, prop_zip))%>%
+  unnest() %>%
+  select(city_state, estimate,conf.low, conf.high)
+
+head(city_prop)
+```
 Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.
 
+```{r, plot}
+
+
+```
 
